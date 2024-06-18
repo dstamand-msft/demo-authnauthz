@@ -1,0 +1,8 @@
+﻿I am in the protected area. You can only see this if you are authenticated.
+@if (ViewBag.Message != null) {
+    <br />
+    <br />
+    <div class="alert alert-@(ViewBag.Success ? "success" : "danger")" role="alert">
+        @ViewBag.Message
+    </div>
+}

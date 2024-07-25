@@ -3,6 +3,7 @@ using Demo.App.Options;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Logging;
 
 namespace Demo.App
 {
@@ -10,7 +11,9 @@ namespace Demo.App
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
+            var entraId = builder.Configuration.GetSection("EntraId");
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -19,7 +22,6 @@ namespace Demo.App
                 .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(options =>
                 {
-                    var entraId = builder.Configuration.GetSection("EntraId");
                     options.Instance = "https://login.microsoftonline.com/";
                     options.TenantId = entraId.GetValue<string>("TenantId");
                     options.ClientId = entraId.GetValue<string>("ClientId");
@@ -27,6 +29,13 @@ namespace Demo.App
                     options.CallbackPath = "/signin-oidc";
                     options.SignedOutCallbackPath = "/signout-oidc";
                     options.AccessDeniedPath = "/Account/Denied";
+                    options.Events.OnTokenValidated = context =>
+                    {
+                        var token = context.SecurityToken.RawData;
+                        System.Diagnostics.Debug.WriteLine($"===> ID TOKEN: {token}");
+                        context.Success();
+                        return Task.CompletedTask;
+                    };
                 }, cookieOptions =>
                 {
                     cookieOptions.AccessDeniedPath = "/Account/Denied";
@@ -57,6 +66,11 @@ namespace Demo.App
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+            }
+
+            if (app.Environment.IsDevelopment())
+            {
+                IdentityModelEventSource.ShowPII = entraId.GetValue<bool>("ShowPii");
             }
 
             app.UseHttpsRedirection();

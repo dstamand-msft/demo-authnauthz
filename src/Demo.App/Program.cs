@@ -36,6 +36,14 @@ namespace Demo.App
                         context.Success();
                         return Task.CompletedTask;
                     };
+                    options.Events.OnTokenResponseReceived = context =>
+                    {
+                        var accessToken = context.TokenEndpointResponse.AccessToken;
+                        var refreshToken = context.TokenEndpointResponse.RefreshToken;
+                        System.Diagnostics.Debug.WriteLine($"===> ACCESS TOKEN: {accessToken}");
+                        System.Diagnostics.Debug.WriteLine($"===> REFRESH TOKEN: {(string.IsNullOrEmpty(refreshToken) ? "N/A" : refreshToken)}");
+                        return Task.CompletedTask;
+                    };
                 }, cookieOptions =>
                 {
                     cookieOptions.AccessDeniedPath = "/Account/Denied";

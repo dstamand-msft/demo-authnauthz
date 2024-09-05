@@ -11,18 +11,18 @@ internal class PermissionActionAuthorizationHandler : AuthorizationHandler<Permi
 {
     private readonly ILogger<PermissionActionAuthorizationHandler> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ITokenAcquisition _tokenAcquisition;
     private readonly APIOptions _apiOptions;
 
     public PermissionActionAuthorizationHandler(
         ILogger<PermissionActionAuthorizationHandler> logger,
         IOptions<APIOptions> apiOptions,
         IHttpClientFactory httpClientFactory,
-        IServiceProvider serviceProvider)
+        ITokenAcquisition tokenAcquisition)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
-        _serviceProvider = serviceProvider;
+        _tokenAcquisition = tokenAcquisition;
         _apiOptions = apiOptions.Value;
     }
 
@@ -34,15 +34,8 @@ internal class PermissionActionAuthorizationHandler : AuthorizationHandler<Permi
         _logger.LogWarning("Evaluating authorization requirement for permission >= {permission}", requirement.Permission);
         try
         {
-            string accessToken;
-            // ITokensAcquisition is scoped, so we need to create a new scope here as the handler is a singleton
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var a = scope.ServiceProvider.GetRequiredService<ITokenAcquisition>();
-                var x = await a.GetAuthenticationResultForUserAsync(_apiOptions.Scopes, user: context.User);
-                accessToken = x.AccessToken;
-            }
-
+            var authenticationResult = await _tokenAcquisition.GetAuthenticationResultForUserAsync(_apiOptions.Scopes, user: context.User);
+            var accessToken = authenticationResult.AccessToken;
             var httpClient = _httpClientFactory.CreateClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 

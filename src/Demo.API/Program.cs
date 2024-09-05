@@ -14,9 +14,9 @@ namespace Demo.API
             builder.Services.AddControllers();
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                //.AddMicrosoftIdentityWebApi(builder.Configuration, "EntraId")
                 .AddMicrosoftIdentityWebApi(options =>
                 {
-                    options.Authority = $"https://login.microsoftonline.com/{builder.Configuration["EntraId:TenantId"]}";
                     options.Audience = builder.Configuration["EntraId:ClientId"];
                 }, options =>
                 {

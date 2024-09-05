@@ -51,6 +51,8 @@ namespace Demo.App
                 .EnableTokenAcquisitionToCallDownstreamApi()
                 .AddInMemoryTokenCaches();
 
+            builder.Services.AddTokenAcquisition(true);
+
             // Replace the default authorization policy provider with our own
             // custom provider which can return authorization policies for given
             // policy names (instead of using the default policy provider)

@@ -29,6 +29,7 @@ namespace Demo.App
                     options.CallbackPath = "/signin-oidc";
                     options.SignedOutCallbackPath = "/signout-oidc";
                     options.AccessDeniedPath = "/Account/Denied";
+                    options.Scope.Add(entraId.GetValue<string>("Scope"));
                     options.Events.OnTokenValidated = context =>
                     {
                         var token = context.SecurityToken.RawData;
@@ -49,7 +50,7 @@ namespace Demo.App
                     cookieOptions.AccessDeniedPath = "/Account/Denied";
                 })
                 .EnableTokenAcquisitionToCallDownstreamApi()
-                .AddInMemoryTokenCaches();
+                .AddSessionTokenCaches();
 
             builder.Services.AddTokenAcquisition(true);
 

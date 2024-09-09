@@ -4,6 +4,6 @@ Content-Type: application/x-www-form-urlencoded
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
 &client_id=><clientId>
 &client_secret=<clientSecret>
-&assertion=***REMOVED***
+&assertion=<access_token>
 &scope=<scope>
 &requested_token_use=on_behalf_of

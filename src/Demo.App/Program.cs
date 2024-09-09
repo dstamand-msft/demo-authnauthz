@@ -50,7 +50,7 @@ namespace Demo.App
                     cookieOptions.AccessDeniedPath = "/Account/Denied";
                 })
                 .EnableTokenAcquisitionToCallDownstreamApi()
-                .AddSessionTokenCaches();
+                .AddInMemoryTokenCaches();
 
             builder.Services.AddTokenAcquisition(true);
 

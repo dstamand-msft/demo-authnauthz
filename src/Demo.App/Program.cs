@@ -3,6 +3,7 @@ using Demo.App.Options;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.Resource;
 using Microsoft.IdentityModel.Logging;
 
 namespace Demo.App
@@ -29,22 +30,30 @@ namespace Demo.App
                     options.CallbackPath = "/signin-oidc";
                     options.SignedOutCallbackPath = "/signout-oidc";
                     options.AccessDeniedPath = "/Account/Denied";
+
+                    //OpenIdConnectMiddlewareDiagnostics
                     options.Events.OnTokenValidated = context =>
                     {
                         var token = context.SecurityToken.RawData;
-                        System.Diagnostics.Debug.WriteLine($"===> ID TOKEN: {token}");
+                        System.Diagnostics.Debug.WriteLine($"===> ID TOKEN: {RemoveTokenSignature(token)}");
                         context.Success();
                         return Task.CompletedTask;
                     };
+
+                   
                     options.Events.OnTokenResponseReceived = context =>
                     {
                         var accessToken = context.TokenEndpointResponse.AccessToken;
-                        var refreshToken = context.TokenEndpointResponse.RefreshToken;
-                        System.Diagnostics.Debug.WriteLine($"===> ACCESS TOKEN: {accessToken}");
-                        System.Diagnostics.Debug.WriteLine($"===> REFRESH TOKEN: {(string.IsNullOrEmpty(refreshToken) ? "N/A" : refreshToken)}");
+                        var idToken = context.TokenEndpointResponse.IdToken;
+                        System.Diagnostics.Debug.WriteLine($"===> ACCESS TOKEN: {RemoveTokenSignature(accessToken)}");
+                        System.Diagnostics.Debug.WriteLine($"===> ACCESS TOKEN: {RemoveTokenSignature(idToken)}");
+                        string clientInfo = context.ProtocolMessage.Parameters["client_info"];
+                        System.Diagnostics.Debug.WriteLine($"===> CLIENT_INFO: {clientInfo}");
+
                         return Task.CompletedTask;
                     };
-                }, cookieOptions =>
+                },                
+                cookieOptions =>
                 {
                     cookieOptions.AccessDeniedPath = "/Account/Denied";
                 })
@@ -97,6 +106,14 @@ namespace Demo.App
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
+        }
+
+
+        // Remove token signature for debugging and logging purposes. Tokens without signature are not valid but will still contain private details.
+        private static string RemoveTokenSignature(string token)
+        {
+            var parts = token.Split('.');
+            return $"{parts[0]}.{parts[1]}.";
         }
     }
 }

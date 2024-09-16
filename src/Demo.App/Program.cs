@@ -31,7 +31,9 @@ namespace Demo.App
                     options.SignedOutCallbackPath = "/signout-oidc";
                     options.AccessDeniedPath = "/Account/Denied";
 
-                    //OpenIdConnectMiddlewareDiagnostics
+                    options.Scope.Add(entraId.GetValue<string>("Scope"));
+                    options.Prompt = "select_account";
+
                     options.Events.OnTokenValidated = context =>
                     {
                         var token = context.SecurityToken.RawData;

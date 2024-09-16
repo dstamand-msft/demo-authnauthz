@@ -1,0 +1,9 @@
+﻿POST https://login.microsoftonline.com/<tenantId>/oauth2/v2.0/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+&client_id=><clientId>
+&client_secret=<clientSecret>
+&assertion=<access_token>
+&scope=<scope>
+&requested_token_use=on_behalf_of

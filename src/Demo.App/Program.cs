@@ -10,6 +10,8 @@ namespace Demo.App
 {
     public class Program
     {
+        
+
         public static void Main(string[] args)
         {
 
@@ -20,13 +22,14 @@ namespace Demo.App
             builder.Services.AddControllersWithViews();
 
             builder.Services
-                .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)                
                 .AddMicrosoftIdentityWebApp(options =>
                 {
                     options.Instance = "https://login.microsoftonline.com/";
                     options.TenantId = entraId.GetValue<string>("TenantId");
                     options.ClientId = entraId.GetValue<string>("ClientId");
                     options.ClientSecret = entraId.GetValue<string>("ClientSecret");
+                    
                     options.CallbackPath = "/signin-oidc";
                     options.SignedOutCallbackPath = "/signout-oidc";
                     options.AccessDeniedPath = "/Account/Denied";
@@ -37,23 +40,22 @@ namespace Demo.App
                     options.Events.OnTokenValidated = context =>
                     {
                         var token = context.SecurityToken.RawData;
-                        System.Diagnostics.Debug.WriteLine($"===> ID TOKEN: {RemoveTokenSignature(token)}");
+                        
+                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated ID TOKEN: {RemoveTokenSignature(token)}");
+                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated idtoken.home_oid: {context?.Principal.GetHomeObjectId() ?? "null"}");
+                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated idtoken.home_tid: {context?.Principal.GetHomeTenantId() ?? "null"}");
+
                         context.Success();
+                        return Task.CompletedTask;
+                    };
+                    options.Events.OnAuthorizationCodeReceived = context =>
+                    {
+                        string client_info = context.ProtocolMessage.GetParameter("client_info");
+                        System.Diagnostics.Debug.WriteLine($"===> OnAuthorizationCodeReceived client_info: {client_info}");
                         return Task.CompletedTask;
                     };
 
                    
-                    options.Events.OnTokenResponseReceived = context =>
-                    {
-                        var accessToken = context.TokenEndpointResponse.AccessToken;
-                        var idToken = context.TokenEndpointResponse.IdToken;
-                        System.Diagnostics.Debug.WriteLine($"===> ACCESS TOKEN: {RemoveTokenSignature(accessToken)}");
-                        System.Diagnostics.Debug.WriteLine($"===> ACCESS TOKEN: {RemoveTokenSignature(idToken)}");
-                        string clientInfo = context.ProtocolMessage.Parameters["client_info"];
-                        System.Diagnostics.Debug.WriteLine($"===> CLIENT_INFO: {clientInfo}");
-
-                        return Task.CompletedTask;
-                    };
                 },                
                 cookieOptions =>
                 {
@@ -118,4 +120,5 @@ namespace Demo.App
             return $"{parts[0]}.{parts[1]}.";
         }
     }
+
 }

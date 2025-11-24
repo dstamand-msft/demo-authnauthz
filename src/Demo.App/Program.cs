@@ -3,12 +3,15 @@ using Demo.App.Options;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.Resource;
 using Microsoft.IdentityModel.Logging;
 
 namespace Demo.App
 {
     public class Program
     {
+        
+
         public static void Main(string[] args)
         {
 
@@ -19,35 +22,42 @@ namespace Demo.App
             builder.Services.AddControllersWithViews();
 
             builder.Services
-                .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)                
                 .AddMicrosoftIdentityWebApp(options =>
                 {
                     options.Instance = "https://login.microsoftonline.com/";
                     options.TenantId = entraId.GetValue<string>("TenantId");
                     options.ClientId = entraId.GetValue<string>("ClientId");
                     options.ClientSecret = entraId.GetValue<string>("ClientSecret");
+                    
                     options.CallbackPath = "/signin-oidc";
                     options.SignedOutCallbackPath = "/signout-oidc";
                     options.AccessDeniedPath = "/Account/Denied";
                     options.Scope.Add(entraId.GetValue<string>("Scope")!);
+                    // uncomment to have the account selection forced
                     //options.Prompt = "select_account";
                     options.Prompt = "none";
                     options.Events.OnTokenValidated = context =>
                     {
                         var token = context.SecurityToken.RawData;
-                        System.Diagnostics.Debug.WriteLine($"===> ID TOKEN: {token}");
+                        
+                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated ID TOKEN: {RemoveTokenSignature(token)}");
+                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated idtoken.home_oid: {context?.Principal.GetHomeObjectId() ?? "null"}");
+                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated idtoken.home_tid: {context?.Principal.GetHomeTenantId() ?? "null"}");
+
                         context.Success();
                         return Task.CompletedTask;
                     };
-                    options.Events.OnTokenResponseReceived = context =>
+                    options.Events.OnAuthorizationCodeReceived = context =>
                     {
-                        var accessToken = context.TokenEndpointResponse.AccessToken;
-                        var refreshToken = context.TokenEndpointResponse.RefreshToken;
-                        System.Diagnostics.Debug.WriteLine($"===> ACCESS TOKEN: {accessToken}");
-                        System.Diagnostics.Debug.WriteLine($"===> REFRESH TOKEN: {(string.IsNullOrEmpty(refreshToken) ? "N/A" : refreshToken)}");
+                        string client_info = context.ProtocolMessage.GetParameter("client_info");
+                        System.Diagnostics.Debug.WriteLine($"===> OnAuthorizationCodeReceived client_info: {client_info}");
                         return Task.CompletedTask;
                     };
-                }, cookieOptions =>
+
+                   
+                },                
+                cookieOptions =>
                 {
                     cookieOptions.AccessDeniedPath = "/Account/Denied";
                 })
@@ -101,5 +111,14 @@ namespace Demo.App
 
             app.Run();
         }
+
+
+        // Remove token signature for debugging and logging purposes. Tokens without signature are not valid but will still contain private details.
+        private static string RemoveTokenSignature(string token)
+        {
+            var parts = token.Split('.');
+            return $"{parts[0]}.{parts[1]}.";
+        }
     }
+
 }

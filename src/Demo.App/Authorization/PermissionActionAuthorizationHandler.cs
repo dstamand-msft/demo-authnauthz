@@ -6,7 +6,7 @@ using Microsoft.Identity.Web;
 
 namespace Demo.App.Authorization;
 
-// see https://github.com/dotnet/aspnetcore/blob/v8.0.6/src/Security/samples/CustomPolicyProvider/Authorization/MinimumAgeAuthorizationHandler.cs
+// see https://github.com/dotnet/aspnetcore/blob/v10.0.0/src/Security/samples/CustomPolicyProvider/Authorization/MinimumAgeAuthorizationHandler.cs
 internal class PermissionActionAuthorizationHandler : AuthorizationHandler<PermissionActionRequirement>
 {
     private readonly ILogger<PermissionActionAuthorizationHandler> _logger;
@@ -60,7 +60,7 @@ internal class PermissionActionAuthorizationHandler : AuthorizationHandler<Permi
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to validate the permission for User {userObjectId} for permission {permission}",
-                context.User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value,
+                context.User.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")!.Value,
                 requirement.Permission);
         }
     }

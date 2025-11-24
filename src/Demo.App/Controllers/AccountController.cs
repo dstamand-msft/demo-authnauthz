@@ -19,7 +19,7 @@ public class AccountController : Controller
         return Redirect("/");
     }
 
-    public IActionResult Denied(string returnUrl = null)
+    public IActionResult Denied(string? returnUrl = null)
     {
         return View();
     }

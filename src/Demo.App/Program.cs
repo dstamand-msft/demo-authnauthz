@@ -29,8 +29,9 @@ namespace Demo.App
                     options.CallbackPath = "/signin-oidc";
                     options.SignedOutCallbackPath = "/signout-oidc";
                     options.AccessDeniedPath = "/Account/Denied";
-                    options.Scope.Add(entraId.GetValue<string>("Scope"));
-                    options.Prompt = "select_account";
+                    options.Scope.Add(entraId.GetValue<string>("Scope")!);
+                    //options.Prompt = "select_account";
+                    options.Prompt = "none";
                     options.Events.OnTokenValidated = context =>
                     {
                         var token = context.SecurityToken.RawData;

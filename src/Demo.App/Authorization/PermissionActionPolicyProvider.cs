@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace Demo.App.Authorization;
 
-// see https://github.com/dotnet/aspnetcore/blob/v8.0.6/src/Security/samples/CustomPolicyProvider/Authorization/MinimumAgePolicyProvider.cs
+// see https://github.com/dotnet/aspnetcore/blob/v10.0.0/src/Security/samples/CustomPolicyProvider/Authorization/MinimumAgePolicyProvider.cs
 public class PermissionActionPolicyProvider : IAuthorizationPolicyProvider
 {
     const string POLICY_PREFIX = "PermissionAction";
@@ -26,20 +26,20 @@ public class PermissionActionPolicyProvider : IAuthorizationPolicyProvider
 
     public Task<AuthorizationPolicy> GetDefaultPolicyAsync() => FallbackPolicyProvider.GetDefaultPolicyAsync();
 
-    public Task<AuthorizationPolicy> GetFallbackPolicyAsync() => FallbackPolicyProvider.GetFallbackPolicyAsync();
+    public Task<AuthorizationPolicy?> GetFallbackPolicyAsync() => FallbackPolicyProvider.GetFallbackPolicyAsync();
 
     // Policies are looked up by string name, so expect 'parameters' (like age)
     // to be embedded in the policy names. This is abstracted away from developers
     // by the more strongly-typed attributes derived from AuthorizeAttribute
     // (like [MinimumAgeAuthorize] in this sample)
-    public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
+    public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
     {
         if (policyName.StartsWith(POLICY_PREFIX, StringComparison.OrdinalIgnoreCase))
         {
             var permission = policyName.Substring(POLICY_PREFIX.Length);
             var policy = new AuthorizationPolicyBuilder();
             policy.AddRequirements(new PermissionActionRequirement(permission));
-            return Task.FromResult(policy.Build());
+            return Task.FromResult<AuthorizationPolicy?>(policy.Build());
         }
 
         // If the policy name doesn't match the format expected by this policy provider,

@@ -9,14 +9,14 @@ namespace Demo.App.Authorization;
 // and the user-supplied permission parameter. A custom authorization policy provider
 // (`PermissionActionPolicyProvider`) can then produce an authorization policy with 
 // the necessary requirements based on this policy name.
-// see https://github.com/dotnet/aspnetcore/blob/v8.0.6/src/Security/samples/CustomPolicyProvider/Authorization/MinimumAgeAuthorizeAttribute.cs
+// see https://github.com/dotnet/aspnetcore/blob/10.0.0/src/Security/samples/CustomPolicyProvider/Authorization/MinimumAgeAuthorizeAttribute.cs
 internal class PermissionActionAuthorizeAttribute : AuthorizeAttribute
 {
     const string POLICY_PREFIX = "PermissionAction";
     public PermissionActionAuthorizeAttribute(string permission) => Permission = permission;
     public string Permission
     {
-        get => Policy.Substring(POLICY_PREFIX.Length);
+        get => Policy!.Substring(POLICY_PREFIX.Length);
         set => Policy = $"{POLICY_PREFIX}{value}";
     }
 }

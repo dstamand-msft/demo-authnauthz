@@ -3,7 +3,6 @@ using Demo.App.Options;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
 using Microsoft.IdentityModel.Logging;
 
 namespace Demo.App
@@ -22,7 +21,7 @@ namespace Demo.App
             builder.Services.AddControllersWithViews();
 
             builder.Services
-                .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)                
+                .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(options =>
                 {
                     options.Instance = "https://login.microsoftonline.com/";
@@ -42,11 +41,42 @@ namespace Demo.App
                         var token = context.SecurityToken.RawData;
                         
                         System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated ID TOKEN: {RemoveTokenSignature(token)}");
-                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated idtoken.home_oid: {context?.Principal.GetHomeObjectId() ?? "null"}");
-                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated idtoken.home_tid: {context?.Principal.GetHomeTenantId() ?? "null"}");
+                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated idtoken.home_oid: {context.Principal!.GetHomeObjectId() ?? "null"}");
+                        System.Diagnostics.Debug.WriteLine($"===> OnTokenValidated idtoken.home_tid: {context.Principal!.GetHomeTenantId() ?? "null"}");
 
                         context.Success();
                         return Task.CompletedTask;
+
+                        // Claims augmentation using the API to get permissions
+                        //var tokenAcquisition = context.HttpContext.RequestServices.GetRequiredService<ITokenAcquisition>();
+                        //var apiOptions = context.HttpContext.RequestServices.GetRequiredService<IOptions<APIOptions>>().Value;
+                        //var httpClientFactory = context.HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>();
+
+                        //var authenticationResult = await tokenAcquisition.GetAuthenticationResultForUserAsync(apiOptions.Scopes, user: context.Principal);
+                        //var accessToken = authenticationResult.AccessToken;
+                        //var httpClient = httpClientFactory.CreateClient();
+                        //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                        //var obj = new
+                        //{
+                        //    permission = "read"
+                        //};
+                        //var content = JsonContent.Create(obj);
+                        //var response = await httpClient.PostAsync($"{apiOptions.BaseUrl}/api/permissions", content);
+
+                        //if (response.IsSuccessStatusCode)
+                        //{
+                        //    var claims = context.Principal!.Claims.ToList();
+                        //    claims.Add(new Claim("read", "true"));
+
+                        //    context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Principal.Identity!.AuthenticationType));
+
+                        //    context.Success();
+                        //}
+                        //else
+                        //{
+                        //    context.Fail("Current user's permissions does not satisfy the permission action authorization requirement read");
+                        //}
                     };
                     options.Events.OnAuthorizationCodeReceived = context =>
                     {

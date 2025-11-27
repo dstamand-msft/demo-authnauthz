@@ -1,4 +1,5 @@
-﻿@using Microsoft.Identity.Web
+﻿@using System.Security.Claims
+@using Microsoft.Identity.Web
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -20,7 +21,10 @@
         <p>[MSAL] TenantId (of the app): @User.GetTenantId()</p>
         <p>[MSAL] HOME ObjectId (in the app directory): @User.GetHomeObjectId()</p>
         <p>[MSAL] HOME TenantId (of the app): @User.GetHomeTenantId()</p>
-
         <p>[MSAL] NameIdentifierId: @User.GetNameIdentifierId()</p>
+
+        @* <p>[DEMO] Custom Claim (read): @User.Claims.First(x => x.Type == "read").Value</p> *@
+        <p>[MSAL] Roles: @string.Join(", ", User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value))</p>
+
     }
 </div>

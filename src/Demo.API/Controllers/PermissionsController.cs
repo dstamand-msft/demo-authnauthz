@@ -6,7 +6,7 @@ namespace Demo.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    //[Microsoft.Identity.Web.AuthorizeForScopes(Scopes = new[] { "user_access" })]
+    //[Microsoft.Identity.Web.AuthorizeForScopes(Scopes = new[] { "user_impersonation" })]
     public class PermissionsController : ControllerBase
     {
         public PermissionsController()
